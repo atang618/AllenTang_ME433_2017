@@ -61,7 +61,11 @@ int main() {
 
     while(1) {
 	    _CP0_SET_COUNT(0);
-        while (_CP0_GET_COUNT() < 24000) { ; }
+        while (_CP0_GET_COUNT() < 24000) { 
+            while (!PORTBbits.RB4) {
+                ; // Low when pressed, stay in loop
+            }
+        }
         LATAINV = 0b10000; // use _CP0_SET_COUNT(0) and _CP0_GET_COUNT() to test the PIC timing
 		  // remember the core timer runs at half the CPU speed
     }
