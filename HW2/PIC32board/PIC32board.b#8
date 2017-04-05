@@ -6,7 +6,7 @@
 <setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="0.05" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.025" altunitdist="inch" altunit="inch"/>
+<grid distance="0.01" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.025" altunitdist="inch" altunit="inch"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
 <layer number="16" name="Bottom" color="1" fill="1" visible="yes" active="yes"/>
@@ -146,6 +146,29 @@
 <wire x1="50" y1="0" x2="50" y2="50" width="0" layer="20"/>
 <wire x1="50" y1="50" x2="0" y2="50" width="0" layer="20"/>
 <wire x1="0" y1="50" x2="0" y2="0" width="0" layer="20"/>
+<text x="3.048" y="33.782" size="1.016" layer="21" font="vector">A0</text>
+<text x="3.048" y="31.242" size="1.016" layer="21" font="vector">A1</text>
+<text x="3.048" y="28.702" size="1.016" layer="21" font="vector">B2</text>
+<text x="3.048" y="26.162" size="1.016" layer="21" font="vector">B3</text>
+<text x="3.048" y="23.622" size="1.016" layer="21" font="vector">B4</text>
+<text x="3.048" y="21.082" size="1.016" layer="21" font="vector">A4</text>
+<text x="3.048" y="18.542" size="1.016" layer="21" font="vector">VDD</text>
+<text x="3.048" y="16.002" size="1.016" layer="21" font="vector">GND</text>
+<polygon width="0.127" layer="21">
+<vertex x="3.048" y="13.97"/>
+<vertex x="4.064" y="14.732"/>
+<vertex x="4.064" y="13.208"/>
+</polygon>
+<text x="44.45" y="33.782" size="1.016" layer="21" font="vector">B15</text>
+<text x="44.45" y="31.242" size="1.016" layer="21" font="vector">B14</text>
+<text x="44.45" y="28.702" size="1.016" layer="21" font="vector">B13</text>
+<text x="44.45" y="26.162" size="1.016" layer="21" font="vector">B9</text>
+<text x="44.45" y="23.622" size="1.016" layer="21" font="vector">B8</text>
+<text x="44.45" y="21.082" size="1.016" layer="21" font="vector">B7</text>
+<text x="44.45" y="18.542" size="1.016" layer="21" font="vector">5V</text>
+<text x="44.45" y="16.002" size="1.016" layer="21" font="vector">GND</text>
+<text x="32.004" y="43.688" size="1.016" layer="21" font="vector">ON</text>
+<text x="21.59" y="1.016" size="1.27" layer="21" font="vector">Allen Tang ME 433 VER 1.0</text>
 </plain>
 <libraries>
 <library name="me433">
