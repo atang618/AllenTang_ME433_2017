@@ -24,17 +24,21 @@ void initSPI1() {
     
 }
 
-void setVoltage(char channel, char voltage) {
-    int select = 0; 
+void setVoltage(unsigned char channel, unsigned char voltage) {
+    unsigned char data = 256*voltage/3.3;           // calculated Dn 
     if (channel == 'A') {
-        select = 0;
+        CS = 0;
+        spi_io((0b0011 << 4) | ((data & 0xF0) >> 4));
+        spi_io((data & 0x0F) << 4);
+        CS = 1;
     }
     else if (channel = 'B') {
-        select = 1;
+        CS = 0;
+        spi_io((0b1011 << 4) | ((data & 0xF0) >> 4));
+        spi_io((data & 0x0F) << 4);
+        CS = 1;
     }
- 
-    int v = voltage - '0';
-    
-    CS = 0;
     
 }
+
+
