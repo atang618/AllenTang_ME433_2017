@@ -39,6 +39,6 @@
 #pragma config FUSBIDIO = ON // USB pins controlled by USB module
 #pragma config FVBUSONIO = ON // USB BUSON controlled by USB module
 
-void boardinit();
+void boardInit();
 
 #endif /* _EXAMPLE_FILE_NAME_H */
