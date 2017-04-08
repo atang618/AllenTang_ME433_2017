@@ -10,7 +10,7 @@ unsigned char spi_io(unsigned char o) {
 
 void initSPI1() {
     /* Initialize chip select pin as digital output pin*/
-    TRISBbits.TRISB8 = 0;
+    TRISBbits.TRISB15 = 0;
     CS = 1;
     
     /* Set up SPI1*/
@@ -22,6 +22,8 @@ void initSPI1() {
     SPI1CONbits.MSTEN = 1;      // master operation
     SPI1CONbits.ON = 1;         // turn on spi 1
     
+    RPB13Rbits.RPB13R = 0b0011; // set RPB13 as SDO1
+    SDI1Rbits.SDI1R = 0b0100;   // set SDI1 as RPB8 
 }
 
 void setVoltage(unsigned char channel, unsigned char voltage) {

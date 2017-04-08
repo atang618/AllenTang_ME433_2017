@@ -1,5 +1,5 @@
-#ifndef _EXAMPLE_FILE_NAME_H    /* Guard against multiple inclusion */
-#define _EXAMPLE_FILE_NAME_H
+#ifndef _CONFIG_H    /* Guard against multiple inclusion */
+#define _CONFIG_H
 
 #include<xc.h>           // processor SFR definitions
 #include<sys/attribs.h>  // __ISR macro
@@ -39,6 +39,4 @@
 #pragma config FUSBIDIO = ON // USB pins controlled by USB module
 #pragma config FVBUSONIO = ON // USB BUSON controlled by USB module
 
-void boardInit();
-
-#endif /* _EXAMPLE_FILE_NAME_H */
+#endif 
