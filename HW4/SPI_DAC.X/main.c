@@ -17,6 +17,13 @@ void interrupt_init();
 void __ISR(_TIMER_2_VECTOR, IPL5SOFT) Controller(void) {
     static int Acnt = 0; 
     static int Bcnt = 0;
+    /* if (CS == 0) {
+        CS = 1;
+    }
+    else if (CS == 1) {
+        CS = 0;
+    }
+    */
     setVoltage('A', sineWave[Acnt]);
     setVoltage('B', triWave[Bcnt]);
     Acnt++;
@@ -28,12 +35,13 @@ void __ISR(_TIMER_2_VECTOR, IPL5SOFT) Controller(void) {
         Bcnt = 0;
     }
     
-    IFS0CLR = 1 << 8;
+    IFS0bits.T2IF = 0;
 }
 
 
 int main () {
     boardInit();
+    initSPI1();
     makeSine();
     makeTri();
     interrupt_init();
@@ -61,6 +69,12 @@ void boardInit() {
 void makeSine() {
     int i;
     for (i = 0; i < SINE_SIZE; i++) {
+        /* if (i < 50) {
+            sineWave[i] = 0;
+        } else {
+            sineWave[i] = 1;
+        }
+        */
         sineWave[i] = (sin(TWO_PI*i/SINE_SIZE)+1)*127;
     }
 }
@@ -74,7 +88,7 @@ void makeTri() {
 
 void interrupt_init() {
     __builtin_disable_interrupts();
-    T2CONbits.TCKPS = 4;    // set prescaler to 1:16
+    T2CONbits.TCKPS = 0b100;    // set prescaler to 1:16
     PR2 = 2999;             // interrupt of 1 kHz
     TMR2 = 0;               // initialize timer 2
     T2CONbits.ON = 1;       // turn on timer 2
