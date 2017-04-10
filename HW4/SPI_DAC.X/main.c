@@ -17,13 +17,7 @@ void interrupt_init();
 void __ISR(_TIMER_2_VECTOR, IPL5SOFT) Controller(void) {
     static int Acnt = 0; 
     static int Bcnt = 0;
-    /* if (CS == 0) {
-        CS = 1;
-    }
-    else if (CS == 1) {
-        CS = 0;
-    }
-    */
+
     setVoltage('A', sineWave[Acnt]);
     setVoltage('B', triWave[Bcnt]);
     
@@ -70,12 +64,6 @@ void boardInit() {
 void makeSine() {
     int i;
     for (i = 0; i < SINE_SIZE; i++) {
-        /* if (i < 50) {
-            sineWave[i] = 0;
-        } else {
-            sineWave[i] = 1;
-        }
-        */
         sineWave[i] = (sin(TWO_PI*i/SINE_SIZE)+1)*127;
     }
 }
