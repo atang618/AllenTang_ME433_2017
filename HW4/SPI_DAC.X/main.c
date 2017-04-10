@@ -26,12 +26,13 @@ void __ISR(_TIMER_2_VECTOR, IPL5SOFT) Controller(void) {
     */
     setVoltage('A', sineWave[Acnt]);
     setVoltage('B', triWave[Bcnt]);
+    
     Acnt++;
     Bcnt++;
     if (Acnt == SINE_SIZE) {
         Acnt = 0;
     }
-    else if (Bcnt == TRI_SIZE) {
+    if (Bcnt == TRI_SIZE) {
         Bcnt = 0;
     }
     
@@ -82,7 +83,7 @@ void makeSine() {
 void makeTri() {
     int i;
     for (i = 0; i < TRI_SIZE; i++) {
-        triWave[i] = i/(TRI_SIZE-1)*254;
+        triWave[i] = (i*254/(TRI_SIZE-1));
     }
 }
 
