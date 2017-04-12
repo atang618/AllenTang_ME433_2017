@@ -64,7 +64,7 @@ void boardInit() {
 void makeSine() {
     int i;
     for (i = 0; i < SINE_SIZE; i++) {
-        sineWave[i] = (sin(TWO_PI*i/SINE_SIZE)+1)*127;
+        sineWave[i] = (sin(TWO_PI*i/SINE_SIZE)+1)*127; // use floating point later
     }
 }
 
