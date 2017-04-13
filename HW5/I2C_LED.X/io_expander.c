@@ -1,14 +1,12 @@
 #include "io_expander.h"
 
 void initExpander(void) {
-    ANSELBbits.ANSB2 = 0;
-    ANSELBbits.ANSB3 = 0;
     i2c_master_setup();
     // set GPIO 0-3 as outputs
     i2c_master_start();
     i2c_master_send(SLAVE_ADDR << 1);
     i2c_master_send(0x00);              // I/O Direction register
-    i2c_master_send(0xF0);
+    i2c_master_send(0xf0);
     i2c_master_stop();
     // could potentially set SEQOP bit here
     i2c_master_start();
@@ -28,10 +26,19 @@ void initExpander(void) {
 }
 
 void setExpander(char pin, char level) {
+    char mask = getExpander();
+    char data;
+    if (level) {
+        data = (level << pin) | mask;
+    } else {
+        data = 0xff ^ (1 << pin);
+        data = data & mask; 
+    }
+    
     i2c_master_start();                     
     i2c_master_send(SLAVE_ADDR << 1);       // write
     i2c_master_send(0x09);                  // GPIO register
-    i2c_master_send(level << pin);          // ideally should read first to figure out mask
+    i2c_master_send(data);          
     i2c_master_stop();
 }
 
