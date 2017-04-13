@@ -1,5 +1,6 @@
 #include "LCD.h"
 #include "config.h"
+#include <stdio.h>
 
 void boardInit();
 
@@ -7,6 +8,11 @@ int main() {
     boardInit();
     SPI1_init();
     LCD_init();
+    
+    char message[20];
+    sprintf(message, "Hello world!");
+    LCD_clearScreen(WHITE);
+    LCD_drawString(50,50,message, GREEN);
 }
 
 void boardInit() {

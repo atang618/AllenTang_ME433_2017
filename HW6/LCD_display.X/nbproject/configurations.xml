@@ -6,6 +6,7 @@
                    projectFiles="true">
       <itemPath>ILI9163C.h</itemPath>
       <itemPath>LCD.h</itemPath>
+      <itemPath>config.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"

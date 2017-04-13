@@ -6,8 +6,8 @@
 
 #define BACKGROUND WHITE
 
-void LCD_drawchar(char);
-
+void LCD_drawChar(unsigned short, unsigned short, char, unsigned short);
+void LCD_drawString(unsigned short, unsigned short, char *, unsigned short);
 
 
 #endif 
