@@ -25,5 +25,6 @@ void LCD_drawString(unsigned short x, unsigned short y, char * msg, unsigned sho
     while (msg[i]) {
         LCD_drawChar(xpntr,y,msg[i],color_active);
         xpntr += 5;
+        i++;
     }
 }
