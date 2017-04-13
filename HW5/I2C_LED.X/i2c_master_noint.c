@@ -1,9 +1,11 @@
 #include "i2c_master_noint.h"
 
 void i2c_master_setup(void) {
-  I2C2BRG = 233;                    // I2CBRG = [1/(2*Fsck) - PGD]*Pblck - 2 
+  ANSELBbits.ANSB2 = 0;             // Disable analog pins
+  ANSELBbits.ANSB3 = 0;
+  I2C2BRG = 233;                    // I2CBRG = [1/(2*Fsck) - PGD]*Pblck - 2 233 for 100 kHz
                                     // look up PGD for your PIC32 = 104ns
-  I2C2CONbits.ON = 1;               // turn on the I2C1 module
+  I2C2CONbits.ON = 1;               // turn on the I2C2 module
 }
 
 // Start a transmission on the I2C bus
