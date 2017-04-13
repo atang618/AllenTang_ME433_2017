@@ -13,7 +13,7 @@ int main() {
             while (!(getExpander() >> 7)) {;}   // wait until GP7 is high
         } else {                                // if GP7 is high
             setExpander(0,1);   
-            while (getExpander() >> 7) {;}      // wait until GP7 is low  
+            while ((getExpander() >> 7)) {;}      // wait until GP7 is low  
         }
     } 
 }
