@@ -28,3 +28,12 @@ void LCD_drawString(unsigned short x, unsigned short y, char * msg, unsigned sho
         i++;
     }
 }
+
+void LCD_drawBar(unsigned short x, unsigned short y, char length, char width, unsigned short color) {
+    int i, j;
+    for (i = 0; i < length; i++) {
+        for (j = 0; j < width; j++) {
+            LCD_drawPixel(i+x,j+y,color);
+        }
+    }
+}

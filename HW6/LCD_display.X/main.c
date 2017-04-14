@@ -1,18 +1,29 @@
 #include "LCD.h"
 #include "config.h"
+#include "timer.h"
 #include <stdio.h>
 
 void boardInit();
+
+void __ISR(_TIMER_2_VECTOR, IPL5SOFT) Controller(void) {
+    static char message[20];
+    static int n = 0;
+    sprintf(message, "Hello world %d!", n);
+    LCD_clearScreen(WHITE);
+    LCD_drawString(28,32, message, GREEN);
+    LCD_drawBar(28,38,5,n,GREEN);
+    
+    IFS0bits.T2IF = 0;
+}
+
 
 int main() {
     boardInit();
     SPI1_init();
     LCD_init();
+    interrupt_init();
     
-    char message[20];
-    sprintf(message, "Hello world!");
-    LCD_clearScreen(WHITE);
-    LCD_drawString(50,50,message, GREEN);
+    while (1) {;}
 }
 
 void boardInit() {

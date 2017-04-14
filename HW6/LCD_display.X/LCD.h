@@ -8,6 +8,6 @@
 
 void LCD_drawChar(unsigned short, unsigned short, char, unsigned short);
 void LCD_drawString(unsigned short, unsigned short, char *, unsigned short);
-
+void LCD_drawBar(unsigned short, unsigned short, char, char, unsigned short);
 
 #endif 
