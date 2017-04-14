@@ -11,7 +11,7 @@ void __ISR(_TIMER_2_VECTOR, IPL5SOFT) Controller(void) {
     sprintf(message, "Hello world %d!", n);
     LCD_clearScreen(WHITE);
     LCD_drawString(28,32, message, GREEN);
-    LCD_drawBar(28,38,5,n,GREEN);
+    LCD_drawBar(28,45,n,5,GREEN);
     
     n++;
     if (n > 100) {
