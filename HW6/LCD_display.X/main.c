@@ -13,6 +13,11 @@ void __ISR(_TIMER_2_VECTOR, IPL5SOFT) Controller(void) {
     LCD_drawString(28,32, message, GREEN);
     LCD_drawBar(28,38,5,n,GREEN);
     
+    n++;
+    if (n > 100) {
+        n = 0;
+    }
+            
     IFS0bits.T2IF = 0;
 }
 
