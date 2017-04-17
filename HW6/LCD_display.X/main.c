@@ -9,9 +9,8 @@ void __ISR(_TIMER_2_VECTOR, IPL5SOFT) Controller(void) {
     static char message[20];
     static int n = 0;
     sprintf(message, "Hello world %d!", n);
-    LCD_clearScreen(WHITE);
     LCD_drawString(28,32, message, GREEN);
-    LCD_drawBar(28,45,n,5,GREEN);
+    LCD_drawBar(28,45,n,10,GREEN);
     
     n++;
     if (n > 100) {
@@ -27,7 +26,8 @@ int main() {
     SPI1_init();
     LCD_init();
     interrupt_init();
-    
+
+    LCD_clearScreen(WHITE);
     while (1) {;}
 }
 
