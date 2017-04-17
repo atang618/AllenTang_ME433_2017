@@ -15,6 +15,7 @@ void __ISR(_TIMER_2_VECTOR, IPL5SOFT) Controller(void) {
     n++;
     if (n > 100) {
         n = 0;
+        LCD_clearScreen(WHITE);
     }
             
     IFS0bits.T2IF = 0;
