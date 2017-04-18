@@ -3,7 +3,7 @@
 #include "timer.h"
 #include <stdio.h>
 
-#define SPT 2/48000000 // seconds per tick at 48 MHz
+#define SPT 2.0/48000000.0 // seconds per tick at 48 MHz
 
 void boardInit();
 
@@ -17,9 +17,10 @@ void __ISR(_TIMER_2_VECTOR, IPL5SOFT) Controller(void) {
     sprintf(message, "Hello world %d!", n);
     LCD_drawString(28,32, message, GREEN);
     LCD_drawBar(28,45,n,10,GREEN);
-    FPS = 1/((_CP0_GET_COUNT()-start)*SPT);
+    LCD_drawBar(28+n,45,100-n,10,WHITE);
+    FPS = 1.0/((_CP0_GET_COUNT()-start)*SPT);
     sprintf(message, "FPS: %5.2f",FPS);
-    LCD_drawString(100,5, message, GREEN);
+    LCD_drawString(70,5, message, GREEN);
             
     n++;
     if (n > 100) {
