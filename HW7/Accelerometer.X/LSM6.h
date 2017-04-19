@@ -6,6 +6,6 @@
 #define SLAVE_ADDR 0b1101011
 
 void initIMU();
-
+void I2C_read_multiple(unsigned char, unsigned char, unsigned char *, int);
 
 #endif 

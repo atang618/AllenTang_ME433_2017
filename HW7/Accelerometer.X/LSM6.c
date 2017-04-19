@@ -22,3 +22,22 @@ void initIMU() {
     i2c_master_send(0x04); // Set IF_INC bit 1
     i2c_master_stop();
 }
+
+void I2C_read_multiple(unsigned char addr, unsigned char reg, unsigned char * data, int length) {
+    int i;
+    i2c_master_start();
+    i2c_master_send(addr << 1); // Write
+    i2c_master_send(reg); // starting register
+    i2c_master_restart();
+    i2c_master_send((addr << 1) | 1); // Read
+    for (i = 0; i < length; i++) {
+        data[i] = i2c_master_recv();
+        if (i < length - 1) {
+            i2c_master_ack(0);
+        }
+        else {
+            i2c_master_ack(1);
+        }
+    }
+    i2c_master_stop();
+} 

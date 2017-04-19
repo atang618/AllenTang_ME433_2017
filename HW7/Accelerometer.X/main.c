@@ -2,7 +2,7 @@
 #include "config.h"
 
 void boardInit();
-
+void dataFormat(unsigned char *, unsigned short);
 
 int main() {
     boardInit();
@@ -33,4 +33,14 @@ void boardInit() {
     LATAbits.LATA4 = 1; 
     
     __builtin_enable_interrupts();
+}
+
+void dataFormat(unsigned char * raw, unsigned short * final, int length) {
+    int i;
+    unsigned char low, high;
+    for (i = 0; i < length; i++) {
+        low = raw[2*i];
+        high = raw[2*i+1];
+        final[i] = (high << 8) | low;
+    }
 }
