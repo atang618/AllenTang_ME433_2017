@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #define CONV 60.0/16383.0
+#define BARWIDTH 10
 
 static volatile unsigned char raw[20];
 static volatile short final[10];
@@ -29,37 +30,51 @@ int main() {
             
     int start;
     float FPS = 0;
-    char message[20];
+    
     char x, y;
+    char x_prev, y_prev;
     while (1) {
         start = _CP0_GET_COUNT();
         // x direction (-y direction of LCD)
         if (final[4] < 0) {
             x = final[4]*CONV*-1;
-            LCD_drawBar(0,64,64-x,10,WHITE);
-            LCD_drawBar(64-x,64,x,10,RED);
-            
+            if (x_prev == 1) {
+                LCD_drawBar(0,64,128,BARWIDTH,WHITE); // clear bar on crossover
+            }
+            LCD_drawBar(0,64,64-x,BARWIDTH,WHITE);
+            LCD_drawBar(64-x,64,x,BARWIDTH,RED);
+            x_prev = 0;
         } 
         else {
             x = final[4]*CONV;
-            LCD_drawBar(64,64,x,10,RED);
-            LCD_drawBar(64+x,64,64-x,10,WHITE);
+            if (x_prev == 0) {
+                LCD_drawBar(0,64,128,BARWIDTH,WHITE); // clear bar on crossover
+            }
+            LCD_drawBar(64,64,x,BARWIDTH,RED);
+            LCD_drawBar(64+x,64,64-x,BARWIDTH,WHITE);
+            x_prev = 1;
         }
         // y direction (-x direction of LCD)
         if (final[5] < 0) {
             y = final[5]*CONV*-1;
-            LCD_drawBar(64,0,10,64-y,WHITE);
-            LCD_drawBar(64,64-y,10,y,BLUE);
+            if (y_prev == 1) {
+                LCD_drawBar(64,0,BARWIDTH,128,WHITE); // clear bar on crossover
+            }
+            LCD_drawBar(64,0,BARWIDTH,64-y,WHITE);
+            LCD_drawBar(64,64-y,BARWIDTH,y,BLUE);
+            y_prev = 0;
         } 
         else {
             y = final[5]*CONV;
-            LCD_drawBar(64,64,10,y,BLUE);
-            LCD_drawBar(64,64+y,10,64-y,WHITE);
+            if (y_prev == 0) {
+                LCD_drawBar(64,0,BARWIDTH,128,WHITE); // clear bar on crossover
+            }
+            LCD_drawBar(64,64,BARWIDTH,y,BLUE);
+            LCD_drawBar(64,64+y,BARWIDTH,64-y,WHITE);
+            y_prev = 1;
         }
         
-        //FPS = 1.0/((_CP0_GET_COUNT()-start)*SPT);
-        // sprintf(message, "FPS: %5.2f",FPS);
-        //LCD_drawString(70,5, message, GREEN);
+        
         while (_CP0_GET_COUNT() - start < 4800000) {;} // update screen at 5 Hz
     } 
     
