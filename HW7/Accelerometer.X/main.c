@@ -36,24 +36,25 @@ int main() {
         // x direction (-y direction of LCD)
         if (final[4] < 0) {
             x = final[4]*CONV*-1;
-            LCD_drawBar(64,64,x,10,RED);
-            LCD_drawBar(64+x,64,64-x,10,WHITE);
+            LCD_drawBar(0,64,64-x,10,WHITE);
+            LCD_drawBar(64-x,64,x,10,RED);
+            
         } 
         else {
             x = final[4]*CONV;
-            LCD_drawBar(0,64,64-x,10,WHITE);
-            LCD_drawBar(64-x,64,x,10,RED);
+            LCD_drawBar(64,64,x,10,RED);
+            LCD_drawBar(64+x,64,64-x,10,WHITE);
         }
         // y direction (-x direction of LCD)
         if (final[5] < 0) {
             y = final[5]*CONV*-1;
-            LCD_drawBar(64,64,10,y,BLUE);
-            LCD_drawBar(64,64+y,10,64-y,WHITE);
+            LCD_drawBar(64,0,10,64-y,WHITE);
+            LCD_drawBar(64,64-y,10,y,BLUE);
         } 
         else {
             y = final[5]*CONV;
-            LCD_drawBar(64,0,10,64-y,WHITE);
-            LCD_drawBar(64,64-y,10,y,BLUE);
+            LCD_drawBar(64,64,10,y,BLUE);
+            LCD_drawBar(64,64+y,10,64-y,WHITE);
         }
         
         //FPS = 1.0/((_CP0_GET_COUNT()-start)*SPT);
