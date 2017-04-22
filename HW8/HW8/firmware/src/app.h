@@ -58,6 +58,9 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include <stdlib.h>
 #include "system_config.h"
 #include "system_definitions.h"
+#include "LCD.h"
+#include "LSM6.h"
+
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
@@ -83,6 +86,9 @@ extern "C" {
     This enumeration defines the valid application states.  These states
     determine the behavior of the application at various times.
 */
+    
+#define CONV 60.0/16383.0
+#define BARWIDTH 10
 
 typedef enum
 {
@@ -117,6 +123,13 @@ typedef struct
 
 } APP_DATA;
 
+
+unsigned char raw[20];
+short final[10];
+int start;
+float FPS;
+char x, y;
+char x_prev, y_prev;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -198,6 +211,7 @@ void APP_Initialize ( void );
 
 void APP_Tasks( void );
 
+void dataFormat(unsigned char *, short *, int);
 
 #endif /* _APP_H */
 

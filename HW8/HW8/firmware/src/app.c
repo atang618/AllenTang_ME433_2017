@@ -141,6 +141,11 @@ void APP_Initialize ( void )
     LATAbits.LATA4 = 0; 
     
     __builtin_enable_interrupts();
+    
+    SPI1_init();
+    LCD_init();
+    initIMU();
+    LCD_clearScreen(WHITE);
 }
 
 
@@ -173,15 +178,52 @@ void APP_Tasks ( void )
         }
 
         case APP_STATE_SERVICE_TASKS:
-        {
-             _CP0_SET_COUNT(0);
-            while (_CP0_GET_COUNT() < 24000) { 
-                while (!PORTBbits.RB4) {
-                    ; // Low when pressed, stay in loop
+        {   
+            start = _CP0_GET_COUNT();
+            // read LSM6
+            I2C_read_multiple(SLAVE_ADDR,0x20,raw,14);
+            dataFormat(raw,final,7);
+            // x direction (-y direction of LCD)
+            if (final[4] < 0) {
+                x = final[4]*CONV*-1;
+                if (x_prev == 1) {
+                    LCD_drawBar(0,64,128,BARWIDTH,WHITE); // clear bar on crossover
                 }
+                LCD_drawBar(0,64,64-x,BARWIDTH,WHITE);
+                LCD_drawBar(64-x,64,x,BARWIDTH,RED);
+                x_prev = 0;
+            } 
+            else {
+                x = final[4]*CONV;
+                if (x_prev == 0) {
+                    LCD_drawBar(0,64,128,BARWIDTH,WHITE); // clear bar on crossover
+                }
+                LCD_drawBar(64,64,x,BARWIDTH,RED);
+                LCD_drawBar(64+x,64,64-x,BARWIDTH,WHITE);
+                x_prev = 1;
             }
-            LATAINV = 0b10000; // use _CP0_SET_COUNT(0) and _CP0_GET_COUNT() to test the PIC timing
-              // remember the core timer runs at half the CPU speed
+            // y direction (-x direction of LCD)
+            if (final[5] < 0) {
+                y = final[5]*CONV*-1;
+                if (y_prev == 1) {
+                    LCD_drawBar(64,0,BARWIDTH,128,WHITE); // clear bar on crossover
+                }
+                LCD_drawBar(64,0,BARWIDTH,64-y,WHITE);
+                LCD_drawBar(64,64-y,BARWIDTH,y,BLUE);
+                y_prev = 0;
+            } 
+            else {
+                y = final[5]*CONV;
+                if (y_prev == 0) {
+                    LCD_drawBar(64,0,BARWIDTH,128,WHITE); // clear bar on crossover
+                }
+                LCD_drawBar(64,64,BARWIDTH,y,BLUE);
+                LCD_drawBar(64,64+y,BARWIDTH,64-y,WHITE);
+                y_prev = 1;
+            }
+
+
+            while (_CP0_GET_COUNT() - start < 4800000) {;} // update screen at 5 Hz
             break;
         }
 
@@ -197,7 +239,15 @@ void APP_Tasks ( void )
     }
 }
 
- 
+ void dataFormat(unsigned char * raw, short * final, int length) {
+    int i;
+    unsigned char low, high;
+    for (i = 0; i < length; i++) {
+        low = raw[2*i];
+        high = raw[2*i+1];
+        final[i] = (high << 8) | low;
+    }
+}
 
 /*******************************************************************************
  End of File
