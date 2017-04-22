@@ -1,4 +1,4 @@
-#ifndef _CONFIG_H    /* Guard against multiple inclusion */
+ #ifndef _CONFIG_H    /* Guard against multiple inclusion */
 #define _CONFIG_H
 
 #include<xc.h>           // processor SFR definitions
