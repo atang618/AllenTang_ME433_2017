@@ -62,6 +62,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 uint8_t APP_MAKE_BUFFER_DMA_READY dataOut[APP_READ_BUFFER_SIZE];
 uint8_t APP_MAKE_BUFFER_DMA_READY readBuffer[APP_READ_BUFFER_SIZE];
 int len, i = 0;
+char sendData = 0;
 int startTime = 0;
 
 // *****************************************************************************
@@ -392,7 +393,9 @@ void APP_Tasks(void) {
                 USB_DEVICE_CDC_Read(USB_DEVICE_CDC_INDEX_0,
                         &appData.readTransferHandle, appData.readBuffer,
                         APP_READ_BUFFER_SIZE);
-
+                if (appData.readBuffer[0] == 'r') {
+                    sendData = true;
+                }
                 if (appData.readTransferHandle == USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID) {
                     appData.state = APP_STATE_ERROR;
                     break;
@@ -411,7 +414,7 @@ void APP_Tasks(void) {
             /* Check if a character was received or a switch was pressed.
              * The isReadComplete flag gets updated in the CDC event handler. */
 
-            if (appData.isReadComplete || _CP0_GET_COUNT() - startTime > (48000000 / 2 / 5)) {
+            if (appData.isReadComplete || _CP0_GET_COUNT() - startTime > (48000000 / 2 / 100)) {
                 appData.state = APP_STATE_SCHEDULE_WRITE;
             }
 
@@ -430,22 +433,34 @@ void APP_Tasks(void) {
             appData.isWriteComplete = false;
             appData.state = APP_STATE_WAIT_FOR_WRITE_COMPLETE;
             
-            I2C_read_multiple(SLAVE_ADDR, 0x20, raw, 14);
-            dataFormat(raw,final,7);
+            if (sendData) {
+                I2C_read_multiple(SLAVE_ADDR, 0x20, raw, 14);
+                dataFormat(raw,final,7);
+                len = sprintf(dataOut, "%3d %6d %6d %6d %6d %6d %6d\r\n", i, final[4],
+                    final[5], final[6], final[1], final[2], final[3]);
+                i++;
+                if (i == 100) {
+                    i = 0;
+                    sendData = false;
+                } 
+            } else {
+                len = 1;
+                dataOut[0] = 0;
+            }
             
-            len = sprintf(dataOut, "%3d %6d %6d %6d %6d %6d %6d\r\n", i, final[4], final[5], final[6], final[1], final[2], final[3]);
-            i++;
-            if (appData.isReadComplete) {
+            
+            
+            /* if (appData.isReadComplete) {
                 USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
                         &appData.writeTransferHandle,
                         appData.readBuffer, 1,
                         USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
-            } else {
+            } else { */
                 USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
                         &appData.writeTransferHandle, dataOut, len,
                         USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
                 startTime = _CP0_GET_COUNT();
-            }
+            //}
             break;
 
         case APP_STATE_WAIT_FOR_WRITE_COMPLETE:
