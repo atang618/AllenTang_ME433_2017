@@ -41,3 +41,13 @@ void I2C_read_multiple(unsigned char addr, unsigned char reg, unsigned char * da
     }
     i2c_master_stop();
 } 
+
+void dataFormat(unsigned char * raw, short * final, int length) {
+    int i;
+    unsigned char low, high;
+    for (i = 0; i < length; i++) {
+        low = raw[2*i];
+        high = raw[2*i+1];
+        final[i] = (high << 8) | low;
+    }
+}
