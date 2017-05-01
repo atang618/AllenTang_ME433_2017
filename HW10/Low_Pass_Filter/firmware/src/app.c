@@ -50,6 +50,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 #include "app.h"
 #include "LSM6.h"
+#include "DSP.h"
 #include <stdio.h>
 #include <xc.h>
 
@@ -63,6 +64,7 @@ uint8_t APP_MAKE_BUFFER_DMA_READY dataOut[APP_READ_BUFFER_SIZE];
 uint8_t APP_MAKE_BUFFER_DMA_READY readBuffer[APP_READ_BUFFER_SIZE];
 int len, i = 0;
 char sendData = 0;
+char sendFilter = 0;
 int startTime = 0;
 
 // *****************************************************************************
@@ -394,6 +396,8 @@ void APP_Tasks(void) {
                         &appData.readTransferHandle, appData.readBuffer,
                         APP_READ_BUFFER_SIZE);
                 if (appData.readBuffer[0] == 'r') {
+                    sendFilter = true;
+                } else if (appData.readBuffer[0] == 'f') {
                     sendData = true;
                 }
                 if (appData.readTransferHandle == USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID) {
@@ -433,16 +437,25 @@ void APP_Tasks(void) {
             appData.isWriteComplete = false;
             appData.state = APP_STATE_WAIT_FOR_WRITE_COMPLETE;
             
-            if (sendData) {
-                I2C_read_multiple(SLAVE_ADDR, 0x20, raw, 14);
-                dataFormat(raw,final,7);
-                len = sprintf(dataOut, "%2d %6d %6d %6d %6d %6d %6d\r\n", i, final[4],
-                    final[5], final[6], final[1], final[2], final[3]);
+            if (sendFilter) {
+                I2C_read_multiple(SLAVE_ADDR, 0x2C, raw, 2);
+                dataFormat(raw,final,1);
+                len = sprintf(dataOut, "%2d %6d %6.3f %6.3f %6.3f\r\n", i, final[0],
+                    MAF(final[0]), IIR(final[0]), FIR(final[0]));
                 i++;
                 if (i == 100) {
                     i = 0;
-                    sendData = false;
+                    sendFilter = false;
                 } 
+            } else if (sendData) {
+                I2C_read_multiple(SLAVE_ADDR, 0x2C, raw, 2);
+                dataFormat(raw,final,1);
+                len = sprintf(dataOut, "%6d\r\n",final[0]);
+                i++;
+                if (i == 300) {
+                    i = 0;
+                    sendData = false;
+                }
             } else {
                 len = 1;
                 dataOut[0] = 0;
