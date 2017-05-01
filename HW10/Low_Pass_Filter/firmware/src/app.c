@@ -452,7 +452,7 @@ void APP_Tasks(void) {
                 dataFormat(raw,final,1);
                 len = sprintf(dataOut, "%6d\r\n",final[0]);
                 i++;
-                if (i == 300) {
+                if (i == 500) {
                     i = 0;
                     sendData = false;
                 }
