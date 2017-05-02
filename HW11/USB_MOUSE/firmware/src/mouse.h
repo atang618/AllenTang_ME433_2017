@@ -60,7 +60,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     None.
 */
 #define MOUSE_BUTTON_NUMBERS 2
-
+#define CONV 5.0/16000.0
 // *****************************************************************************
 /* Mouse Coordinate.
   Summary:

@@ -51,6 +51,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "app.h"
 
 
+
 // *****************************************************************************
 // *****************************************************************************
 // Section: Global Data Definitions
@@ -255,6 +256,7 @@ void APP_Initialize(void) {
     //appData.emulateMouse = true;
     appData.hidInstance = 0;
     appData.isMouseReportSendBusy = false;
+    initIMU();
 }
 
 /******************************************************************************
@@ -302,11 +304,13 @@ void APP_Tasks(void) {
 
         case APP_STATE_MOUSE_EMULATE:
             
+            I2C_read_multiple(SLAVE_ADDR, raw, 0x28, 4);
+            dataFormat(raw,final,2);
             if (inc == 10) {
                 appData.mouseButton[0] = MOUSE_BUTTON_STATE_RELEASED;
                 appData.mouseButton[1] = MOUSE_BUTTON_STATE_RELEASED;
-                appData.xCoordinate = (int8_t) 1;
-                appData.yCoordinate = (int8_t) 1;  
+                appData.xCoordinate = (int8_t) final[0]*CONV;
+                appData.yCoordinate = (int8_t) final[1]*CONV;  
             } else {
                 inc++;
             }
