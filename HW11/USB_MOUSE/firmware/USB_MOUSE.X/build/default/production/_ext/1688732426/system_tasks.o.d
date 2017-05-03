@@ -228,4 +228,6 @@ build/default/production/_ext/1688732426/system_tasks.o:  \
  ../../../../../../../../../../microchip/harmony/v1_10/framework/usb/usb_hid.h  \
  ../src/app.h  \
 ../src/system_config/default/system_definitions.h  \
- ../src/mouse.h 
+ ../src/mouse.h  \
+../src/LSM6.h  \
+../src/i2c_master_noint.h 

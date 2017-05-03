@@ -257,6 +257,8 @@ void APP_Initialize(void) {
     appData.hidInstance = 0;
     appData.isMouseReportSendBusy = false;
     initIMU();
+    TRISAbits.TRISA4 = 0;
+    LATAbits.LATA4 = 1;
 }
 
 /******************************************************************************
@@ -268,6 +270,7 @@ void APP_Initialize(void) {
 
 void APP_Tasks(void) {
     static uint8_t inc = 0;
+    static short x = 0, y = 0;
 
     /* Check the application's current state. */
     switch (appData.state) {
@@ -303,16 +306,27 @@ void APP_Tasks(void) {
             break;
 
         case APP_STATE_MOUSE_EMULATE:
+            appData.mouseButton[0] = MOUSE_BUTTON_STATE_RELEASED;
+            appData.mouseButton[1] = MOUSE_BUTTON_STATE_RELEASED;
             
-            I2C_read_multiple(SLAVE_ADDR, raw, 0x28, 4);
-            dataFormat(raw,final,2);
             if (inc == 10) {
-                appData.mouseButton[0] = MOUSE_BUTTON_STATE_RELEASED;
-                appData.mouseButton[1] = MOUSE_BUTTON_STATE_RELEASED;
-                appData.xCoordinate = (int8_t) final[0]*CONV;
-                appData.yCoordinate = (int8_t) final[1]*CONV;  
+                I2C_read_multiple(SLAVE_ADDR, 0x28, raw, 4);
+                dataFormat(raw,final,2);
+               
+                appData.xCoordinate = (int8_t) (final[0]*0.001);
+                appData.yCoordinate = (int8_t) (final[1]*0.001); 
+                inc = 0;
             } else {
+                
+                appData.xCoordinate = (int8_t) 0;
+                appData.yCoordinate = (int8_t) 0; 
                 inc++;
+            }
+            
+            if (!PORTBbits.RB4) {
+                appData.xCoordinate = 0;
+                appData.yCoordinate = 0; 
+                appData.mouseButton[0] = MOUSE_BUTTON_STATE_PRESSED;
             }
             
 
