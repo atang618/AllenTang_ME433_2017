@@ -55,13 +55,13 @@
             android:id="@+id/surfaceview"
             android:layout_width="640px"
             android:layout_height="480px"
-            android:layout_gravity="center"
-            android:layout_weight="0.25" />
+            android:layout_gravity="center" />
 
         <TextureView
             android:id="@+id/textureview"
             android:layout_width="1dp"
-            android:layout_height="1dp" />
+            android:layout_height="1dp"
+            android:layout_gravity="center_horizontal"/>
 
 
     </LinearLayout>

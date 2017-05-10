@@ -50,7 +50,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         mTextView2 = (TextView) findViewById(R.id.cameraStatus);
         myControl = (SeekBar) findViewById(R.id.seek1);
         mTextView1 = (TextView) findViewById(R.id.textView01);
-        mTextView1.setText("Thresh = 155");
+        mTextView1.setText("Thresh = 0");
         setMyControlListener();
 
         // see if the app has permission to use the camera
@@ -81,7 +81,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 progressChanged = progress;
-                mTextView1.setText("Thresh = " + (progress + 155));
+                mTextView1.setText("Thresh = " + progress);
             }
 
             @Override
@@ -130,7 +130,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
 
         final Canvas c = mSurfaceHolder.lockCanvas();
         if (c != null) {
-            int thresh = myControl.getProgress()+155;
+            int thresh = myControl.getProgress();
             int[] pixels = new int[bmp.getWidth()]; // pixels[] is the RGBA data
             int startY; // which row in the bitmap to analyze to read
             for (startY = 0; startY < bmp.getHeight(); startY += 5) {
@@ -138,7 +138,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
 
                 // in the row, see if there is more green than red
                 for (int i = 0; i < bmp.getWidth(); i++) {
-                    if ((green(pixels[i]) - red(pixels[i])) > thresh) {
+                    if ((green(pixels[i]) - red(pixels[i])) > thresh & (green(pixels[i]) - blue(pixels[i])) > thresh) {
                         pixels[i] = rgb(0, 255, 0); // over write the pixel with pure green
                     }
                 }
@@ -149,12 +149,12 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         }
 
         // draw a circle at some position
-        
+        /*
         int pos = 50;
         canvas.drawCircle(pos, 240, 5, paint1); // x position, y position, diameter, color
 
         // write the pos as text
-        canvas.drawText("pos = " + pos, 10, 200, paint1);
+        canvas.drawText("pos = " + pos, 10, 200, paint1); */
         c.drawBitmap(bmp, 0, 0, null);
         mSurfaceHolder.unlockCanvasAndPost(c);
 
