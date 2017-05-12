@@ -43,8 +43,7 @@
             android:id="@+id/button1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Send slider value"
-            android:gravity="center"/>
+            android:text="Send slider value" />
 
         <TextView
             android:id="@+id/textView02"
@@ -56,9 +55,8 @@
         <ScrollView
             android:id="@+id/ScrollView01"
             android:layout_width="wrap_content"
-            android:layout_height="250dip"
-            android:gravity="center">
-            
+            android:layout_height="250dip">
+
             <TextView
                 android:id="@+id/textView03"
                 android:text="nothing from usb yet"
@@ -67,7 +65,6 @@
                 android:background="@android:color/holo_green_light"
                 />
         </ScrollView>
-
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
