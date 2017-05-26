@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.atang618.techcup.MainActivity">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="200dp"
+        android:orientation="vertical"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="10dp"
+        android:weightSum="1"
+        tools:layout_editor_absoluteX="8dp"
+        tools:layout_editor_absoluteY="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sensitivity"
+            android:textAlignment="textStart" />
+
+        <SeekBar
+            android:id="@+id/seek1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:progress="0"
+            android:secondaryProgress="0" />
+
+        <TextView
+            android:id="@+id/textView01"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="slide value " />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="X Width"
+            android:textAlignment="textStart" />
+
+        <SeekBar
+            android:id="@+id/seek2"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:progress="0"
+            android:secondaryProgress="0" />
+
+        <TextView
+            android:id="@+id/textView03"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="slide value " />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width = "fill_parent"
+        android:layout_height= "match_parent"
+        android:orientation="horizontal"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="10dp"
+        android:weightSum="1">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Y Start"
+                android:textAlignment="center"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:rotation="90">
+
+                <SeekBar
+                    android:id="@+id/seek3"
+                    android:layout_width="363dp"
+                    android:layout_height="224dp"
+
+                    android:progress="0"
+
+                    android:secondaryProgress="0" />
+
+            </LinearLayout>
+
+
+            <TextView
+                android:id="@+id/textView04"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="slide value " />
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation= "vertical">
+            <TextView
+                android:id="@+id/cameraStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="FPS" />
+
+            <SurfaceView
+                android:id="@+id/surfaceview"
+                android:layout_width="640px"
+                android:layout_height="480px"
+                android:layout_gravity="center" />
+
+            <TextureView
+                android:id="@+id/textureview"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:layout_gravity="center_horizontal" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
