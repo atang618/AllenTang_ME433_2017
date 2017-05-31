@@ -21,7 +21,9 @@ import android.support.v4.content.ContextCompat;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.TextureView;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -34,6 +36,7 @@ import com.hoho.android.usbserial.driver.UsbSerialProber;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,7 +59,8 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
     private TextView mTextView4;
     private SeekBar myControl;
     private SeekBar yStart;
-
+    ScrollView myScrollView;
+    TextView myTextView3;
     private UsbManager manager;
     private UsbSerialPort sPort;
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
@@ -86,8 +90,10 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         mTextView4 = (TextView) findViewById(R.id.textView04);
         mTextView4.setText("yStart = 0");
         setMyControlListener();
-
         setYStartListener();
+
+        myScrollView = (ScrollView) findViewById(R.id.ScrollView01);
+        myTextView3 = (TextView) findViewById(R.id.textView03);
 
         // see if the app has permission to use the camera
         ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, 1);
@@ -352,6 +358,13 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
 
     private void updateReceivedData(byte[] data) {
         //do something with received data
-        
+        String rxString = null;
+        try {
+            rxString = new String(data, "UTF-8"); // put the data you got into a string
+            myTextView3.append(rxString);
+            myScrollView.fullScroll(View.FOCUS_DOWN);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
     }
 }
