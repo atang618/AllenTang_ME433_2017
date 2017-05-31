@@ -38,17 +38,13 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
     private Paint paint1 = new Paint();
     private TextView mTextView1;
     private TextView mTextView2;
-    private TextView mTextView3;
     private TextView mTextView4;
     private SeekBar myControl;
-    private SeekBar xBoundaries;
     private SeekBar yStart;
 
     static long prevtime = 0; // for FPS calculation
-    static boolean color_flag = false;
     static char direction = 'C';
-    static int boundary_left;
-    static int boundary_right;
+    static int location;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,16 +53,15 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
 
         mTextView2 = (TextView) findViewById(R.id.cameraStatus);
         myControl = (SeekBar) findViewById(R.id.seek1);
-        xBoundaries = (SeekBar) findViewById(R.id.seek2);
+
         yStart = (SeekBar) findViewById(R.id.seek3);
         mTextView1 = (TextView) findViewById(R.id.textView01);
         mTextView1.setText("Thresh = 0");
-        mTextView3 = (TextView) findViewById(R.id.textView03);
-        mTextView3.setText("xFrame = 320-320");
+
         mTextView4 = (TextView) findViewById(R.id.textView04);
         mTextView4.setText("yStart = 0");
         setMyControlListener();
-        setXBoundariesListener();
+
         setYStartListener();
 
         // see if the app has permission to use the camera
@@ -112,29 +107,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
 
     }
 
-    private void setXBoundariesListener() {
-        xBoundaries.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 
-
-
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                boundary_left = (640-progress*6)/2;
-                boundary_right = 640-(640-progress*6)/2;
-                mTextView3.setText("xFrame = " + boundary_left + "-" + boundary_right);
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-
-    }
     private void setYStartListener() {
         yStart.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 
@@ -188,53 +161,45 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         mTextureView.getBitmap(bmp);
 
         final Canvas c = mSurfaceHolder.lockCanvas();
-        int endY = yStart.getProgress() + 10;
+        int startY = yStart.getProgress()*5;
+        int endY = startY + 10;
         if (c != null) {
             int thresh = myControl.getProgress();
             int[] pixels = new int[bmp.getWidth()]; // pixels[] is the RGBA data
-            boolean turn_flag = false;
-            int startY; // which row in the bitmap to analyze to read
-
-            for (startY = yStart.getProgress(); startY < endY; startY += 5) {
-                bmp.getPixels(pixels, 0, bmp.getWidth(), 0, startY, bmp.getWidth(), 1);
+             // which row in the bitmap to analyze to read
+            int totalMass = 0;
+            int massIndex = 0;
+            for (int j = startY; j < endY; j += 5) {
+                bmp.getPixels(pixels, 0, bmp.getWidth(), 0, j, bmp.getWidth(), 1);
 
                 // in the row, see if there is more green than red
                 for (int i = 0; i < bmp.getWidth(); i++) {
                     if ((green(pixels[i]) - red(pixels[i])) > thresh) {
                         pixels[i] = rgb(0, 255, 0); // over write the pixel with pure green
-                        color_flag = true;
+
                     } else if ((blue(pixels[i]) - red(pixels[i])) > thresh) {
                         pixels[i] = rgb(0, 0, 255);
-                    }
-                    if (startY == yStart.getProgress()) { // check first line for determining if there needs be a turn
-                        if (color_flag) {
-                            if (i > boundary_left & i < bmp.getWidth() / 2) {
-                                direction = 'R';
-                                turn_flag = true;
-                            } else if (i > bmp.getWidth() / 2 & i < boundary_right) {
-                                direction = 'L';
-                                turn_flag = true;
-                            }
-                            color_flag = false;
-                        }
+                    } else {
+                        massIndex += i;
+                        totalMass += 1;
                     }
                 }
-
                 // update the row
-                bmp.setPixels(pixels, 0, bmp.getWidth(), 0, startY, bmp.getWidth(), 1);
+                bmp.setPixels(pixels, 0, bmp.getWidth(), 0, j, bmp.getWidth(), 1);
             }
-            if (!turn_flag) {
-                direction = 'C';
-            }
+            location = massIndex / totalMass;
         }
 
         // draw a circle at some position
 
-        canvas.drawCircle(boundary_left, yStart.getProgress(), 2, paint1); // x position, y position, diameter, color
-        canvas.drawCircle(boundary_right, yStart.getProgress(), 2, paint1);
-        canvas.drawCircle(boundary_left, endY, 2, paint1);
-        canvas.drawCircle(boundary_right, endY, 2, paint1);
-
+        canvas.drawCircle(location, startY, 4, paint1); // x position, y position, diameter, color
+        if (location > 245) {
+            direction = 'L';
+        } else if (location < 245) {
+            direction = 'R';
+        } else {
+            direction = 'C';
+        }
         // canvas.drawRect(boundary_left,yStart.getProgress(),boundary_left,yStart.getProgress() + 200, paint1);
         // write the pos as text
         canvas.drawText("Direction = " + direction, 20, 420, paint1);
