@@ -356,6 +356,8 @@ void APP_Initialize(void) {
 	OC2R				= 2400;         // initialize before turning OC2 on
 	OC2CONbits.ON		= 1;			// turn on OC2
     
+    TRISAbits.TRISA4 = 0;
+    LATAbits.LATA4 = 1; //OFF 
     startTime = _CP0_GET_COUNT();
 }
 
@@ -419,6 +421,7 @@ void APP_Tasks(void) {
                 while (appData.readBuffer[ii] != 0) {
                     // if you got a newline
                     if (appData.readBuffer[ii] == '\n' || appData.readBuffer[ii] == '\r') {
+                        LATAbits.LATA4 = 0; //turn on light
                         rx[rxPos] = 0; // end the array
                         sscanf(rx, "%d %d", &lPWM, &rPWM); // get the PWM values out of the array
                         gotRx = 1; // set the flag

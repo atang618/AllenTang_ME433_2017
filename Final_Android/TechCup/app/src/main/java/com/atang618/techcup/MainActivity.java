@@ -59,21 +59,25 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
     private TextView mTextView4;
     private SeekBar myControl;
     private SeekBar yStart;
-    ScrollView myScrollView;
-    TextView myTextView3;
+
+
+    private ScrollView myScrollView;
+    private TextView myTextView3;
+
     private UsbManager manager;
     private UsbSerialPort sPort;
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
     private SerialInputOutputManager mSerialIoManager;
 
-
     static long prevtime = 0; // for FPS calculation
     static char direction = 'C';
     static int location;
-    static int rPWM = 1500;
-    static int lPWM = 1500;
-    static int cPWM = 1500; // normal speed
-    static int gain = 20;
+    static int threshold = 20;
+    static int rPWM = 2400;
+    static int lPWM = 2400;
+    static int cPWM = 2400; // normal speed
+    static int gain = 10;
+
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -218,22 +222,26 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
                 // update the row
                 bmp.setPixels(pixels, 0, bmp.getWidth(), 0, j, bmp.getWidth(), 1);
             }
-            location = massIndex / totalMass;
+            if (totalMass < threshold) { //all green or blue
+                location = 320;
+            } else {
+                location = massIndex / totalMass;
+            }
         }
 
         // draw a circle at some position
 
         canvas.drawCircle(location, startY, 4, paint1); // x position, y position, diameter, color
         String sendString;
-        if (location > 245) {
+        if (location > 320) {
             direction = 'L';
-            lPWM = (location - 245)*gain + cPWM;
+            lPWM = (location - 320)*gain + cPWM;
             rPWM = cPWM;
             sendString = String.valueOf(lPWM + ' '+ rPWM + '\n');
-        } else if (location < 245) {
+        } else if (location < 320) {
             direction = 'R';
             lPWM = cPWM;
-            rPWM = (245 - location)*gain + cPWM;
+            rPWM = (320 - location)*gain + cPWM;
             sendString = String.valueOf(lPWM + ' '+ rPWM + '\n');
         } else {
             direction = 'C';
@@ -260,6 +268,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         prevtime = nowtime;
     }
     // USB functions
+
     private final SerialInputOutputManager.Listener mListener =
             new SerialInputOutputManager.Listener() {
                 @Override
@@ -367,4 +376,5 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
             e.printStackTrace();
         }
     }
+
 }
