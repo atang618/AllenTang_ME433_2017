@@ -337,23 +337,23 @@ void APP_Initialize(void) {
     appData.readBuffer = &readBuffer[0];
     
      //Timer Setup
-    T2CONbits.TCKPS 	= 1;			// timer2 pre-scaler N=2 (1:2)
-	PR2 				= 3999;			// period2 = (3999+1) * 2 * 12.5ns = 0.0001s, 10 kHz
+    T2CONbits.TCKPS 	= 0;			// timer2 pre-scaler N=1 (1:1)
+	PR2 				= 4799;			// period2 = (3999+1) * 1 * 20.8 ns = 0.0001s, 10 kHz
 	TMR2 				= 0;			// set timer to 0;
     T2CONbits.ON		= 1;			// turn on Timer2
     //OC1 Setup
     RPB15Rbits.RPB15R = 0b0101;         // OC1 = B15
     OC1CONbits.OCM		= 0x06;         // PWM mode without fault pin; other OC1CON bits are defaults
 	OC1CONbits.OCTSEL	= 0;			// use Timer 2
-	OC1RS				= 2000;         // duty cycle = OC1RS/(PR2+1) = 50%
-	OC1R				= 2000;         // initialize before turning OC1 on
+	OC1RS				= 2400;         // duty cycle = OC1RS/(PR2+1) = 50%
+	OC1R				= 2400;         // initialize before turning OC1 on
 	OC1CONbits.ON		= 1;			// turn on OC1
     //OC2 Setup
-    RPA1Rbits.RPA1R = 0b0101;           //OC2 = A0
+    RPA1Rbits.RPA1R = 0b0101;           //OC2 = A1
     OC2CONbits.OCM		= 0x06;         // PWM mode without fault pin; other OC2CON bits are defaults
 	OC2CONbits.OCTSEL	= 0;			// use Timer 2
-	OC2RS				= 2000;         // duty cycle = OC2RS/(PR2+1) = 50%
-	OC2R				= 2000;         // initialize before turning OC2 on
+	OC2RS				= 2400;         // duty cycle = OC2RS/(PR2+1) = 50%
+	OC2R				= 2400;         // initialize before turning OC2 on
 	OC2CONbits.ON		= 1;			// turn on OC2
     
     startTime = _CP0_GET_COUNT();
