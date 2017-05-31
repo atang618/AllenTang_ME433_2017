@@ -4,12 +4,17 @@ package com.atang618.techcup;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
+import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -21,7 +26,17 @@ import android.widget.TextView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
+import com.hoho.android.usbserial.driver.CdcAcmSerialDriver;
+import com.hoho.android.usbserial.driver.ProbeTable;
+import com.hoho.android.usbserial.driver.UsbSerialDriver;
+import com.hoho.android.usbserial.driver.UsbSerialPort;
+import com.hoho.android.usbserial.driver.UsbSerialProber;
+import com.hoho.android.usbserial.util.SerialInputOutputManager;
+
 import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static android.graphics.Color.blue;
 import static android.graphics.Color.green;
@@ -42,9 +57,19 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
     private SeekBar myControl;
     private SeekBar yStart;
 
+    private UsbManager manager;
+    private UsbSerialPort sPort;
+    private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
+    private SerialInputOutputManager mSerialIoManager;
+
+
     static long prevtime = 0; // for FPS calculation
     static char direction = 'C';
     static int location;
+    static int rPWM = 1500;
+    static int lPWM = 1500;
+    static int cPWM = 1500; // normal speed
+    static int gain = 20;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,7 +106,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         } else {
             mTextView2.setText("no camera permissions");
         }
-
+        manager = (UsbManager) getSystemService(Context.USB_SERVICE);
     }
 
     private void setMyControlListener() {
@@ -193,13 +218,28 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         // draw a circle at some position
 
         canvas.drawCircle(location, startY, 4, paint1); // x position, y position, diameter, color
+        String sendString;
         if (location > 245) {
             direction = 'L';
+            lPWM = (location - 245)*gain + cPWM;
+            rPWM = cPWM;
+            sendString = String.valueOf(lPWM + ' '+ rPWM + '\n');
         } else if (location < 245) {
             direction = 'R';
+            lPWM = cPWM;
+            rPWM = (245 - location)*gain + cPWM;
+            sendString = String.valueOf(lPWM + ' '+ rPWM + '\n');
         } else {
             direction = 'C';
+            lPWM = cPWM;
+            rPWM = cPWM;
+            sendString = String.valueOf(lPWM + ' '+ rPWM + '\n');
         }
+
+        try {
+            sPort.write(sendString.getBytes(), 10); // 10 is the timeout
+        } catch (IOException e) { }
+
         // canvas.drawRect(boundary_left,yStart.getProgress(),boundary_left,yStart.getProgress() + 200, paint1);
         // write the pos as text
         canvas.drawText("Direction = " + direction, 20, 420, paint1);
@@ -212,5 +252,106 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         long diff = nowtime - prevtime;
         mTextView2.setText("FPS " + 1000 / diff);
         prevtime = nowtime;
+    }
+    // USB functions
+    private final SerialInputOutputManager.Listener mListener =
+            new SerialInputOutputManager.Listener() {
+                @Override
+                public void onRunError(Exception e) {
+
+                }
+
+                @Override
+                public void onNewData(final byte[] data) {
+                    MainActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            MainActivity.this.updateReceivedData(data);
+                        }
+                    });
+                }
+            };
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+        stopIoManager();
+        if(sPort != null){
+            try{
+                sPort.close();
+            } catch (IOException e){ }
+            sPort = null;
+        }
+        finish();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        ProbeTable customTable = new ProbeTable();
+        customTable.addProduct(0x04D8,0x000A, CdcAcmSerialDriver.class);
+        UsbSerialProber prober = new UsbSerialProber(customTable);
+
+        final List<UsbSerialDriver> availableDrivers = prober.findAllDrivers(manager);
+
+        if(availableDrivers.isEmpty()) {
+            //check
+            return;
+        }
+
+        UsbSerialDriver driver = availableDrivers.get(0);
+        sPort = driver.getPorts().get(0);
+
+        if (sPort == null){
+            //check
+        }else{
+            final UsbManager usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+            UsbDeviceConnection connection = usbManager.openDevice(driver.getDevice());
+            if (connection == null){
+                //check
+                PendingIntent pi = PendingIntent.getBroadcast(this, 0, new Intent("com.android.example.USB_PERMISSION"), 0);
+                usbManager.requestPermission(driver.getDevice(), pi);
+                return;
+            }
+
+            try {
+                sPort.open(connection);
+                sPort.setParameters(9600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+
+            }catch (IOException e) {
+                //check
+                try{
+                    sPort.close();
+                } catch (IOException e1) { }
+                sPort = null;
+                return;
+            }
+        }
+        onDeviceStateChange();
+    }
+
+    private void stopIoManager(){
+        if(mSerialIoManager != null) {
+            mSerialIoManager.stop();
+            mSerialIoManager = null;
+        }
+    }
+
+    private void startIoManager() {
+        if(sPort != null){
+            mSerialIoManager = new SerialInputOutputManager(sPort, mListener);
+            mExecutor.submit(mSerialIoManager);
+        }
+    }
+
+    private void onDeviceStateChange(){
+        stopIoManager();
+        startIoManager();
+    }
+
+    private void updateReceivedData(byte[] data) {
+        //do something with received data
+        
     }
 }
