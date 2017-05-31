@@ -61,8 +61,12 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 uint8_t APP_MAKE_BUFFER_DMA_READY dataOut[APP_READ_BUFFER_SIZE];
 uint8_t APP_MAKE_BUFFER_DMA_READY readBuffer[APP_READ_BUFFER_SIZE];
 int len, i = 0;
-char sendData = 0;
 int startTime = 0;
+char rx[64]; // the raw data
+int rxPos = 0; // how much data has been stored
+int gotRx = 0; // the flag
+int rPWM = 2000; // default PWM is 50%
+int lPWM = 2000;
 
 // *****************************************************************************
 /* Application Data
@@ -333,23 +337,23 @@ void APP_Initialize(void) {
     appData.readBuffer = &readBuffer[0];
     
      //Timer Setup
-    T2CONbits.TCKPS 	= 4;			// timer2 pre-scaler N=16 (1:16)
-	PR2 				= 2999;			// period2 = (4999+1) * 16 * 12.5ns = 0.001s, 1 kHz
+    T2CONbits.TCKPS 	= 1;			// timer2 pre-scaler N=2 (1:2)
+	PR2 				= 3999;			// period2 = (3999+1) * 2 * 12.5ns = 0.0001s, 10 kHz
 	TMR2 				= 0;			// set timer to 0;
     T2CONbits.ON		= 1;			// turn on Timer2
     //OC1 Setup
     RPB15Rbits.RPB15R = 0b0101;         // OC1 = B15
     OC1CONbits.OCM		= 0x06;         // PWM mode without fault pin; other OC1CON bits are defaults
 	OC1CONbits.OCTSEL	= 0;			// use Timer 2
-	OC1RS				= 1500;         // duty cycle = OC1RS/(PR2+1) = 50%
-	OC1R				= 1500;         // initialize before turning OC1 on
+	OC1RS				= 2000;         // duty cycle = OC1RS/(PR2+1) = 50%
+	OC1R				= 2000;         // initialize before turning OC1 on
 	OC1CONbits.ON		= 1;			// turn on OC1
     //OC2 Setup
     RPA1Rbits.RPA1R = 0b0101;           //OC2 = A0
     OC2CONbits.OCM		= 0x06;         // PWM mode without fault pin; other OC2CON bits are defaults
 	OC2CONbits.OCTSEL	= 0;			// use Timer 2
-	OC2RS				= 1500;         // duty cycle = OC2RS/(PR2+1) = 50%
-	OC2R				= 1500;         // initialize before turning OC2 on
+	OC2RS				= 2000;         // duty cycle = OC2RS/(PR2+1) = 50%
+	OC2R				= 2000;         // initialize before turning OC2 on
 	OC2CONbits.ON		= 1;			// turn on OC2
     
     startTime = _CP0_GET_COUNT();
@@ -410,8 +414,23 @@ void APP_Tasks(void) {
                 USB_DEVICE_CDC_Read(USB_DEVICE_CDC_INDEX_0,
                         &appData.readTransferHandle, appData.readBuffer,
                         APP_READ_BUFFER_SIZE);
-                if (appData.readBuffer[0] == 'r') {
-                    sendData = true;
+                int ii = 0;
+                // loop thru the characters in the buffer
+                while (appData.readBuffer[ii] != 0) {
+                    // if you got a newline
+                    if (appData.readBuffer[ii] == '\n' || appData.readBuffer[ii] == '\r') {
+                        rx[rxPos] = 0; // end the array
+                        sscanf(rx, "%d %d", &lPWM, &rPWM); // get the PWM values out of the array
+                        gotRx = 1; // set the flag
+                        break; // get out of the while loop
+                    } else if (appData.readBuffer[ii] == 0) {
+                        break; // there was no newline, get out of the while loop
+                    } else {
+                        // save the character into the array
+                        rx[rxPos] = appData.readBuffer[ii];
+                        rxPos++;
+                        ii++;
+                    }
                 }
                 if (appData.readTransferHandle == USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID) {
                     appData.state = APP_STATE_ERROR;
@@ -450,19 +469,16 @@ void APP_Tasks(void) {
             appData.isWriteComplete = false;
             appData.state = APP_STATE_WAIT_FOR_WRITE_COMPLETE;
             
-            if (sendData) {
-                
-             
-                if (i == 100) {
-                    i = 0;
-                    sendData = false;
-                } 
+            if (gotRx) {
+                OC1RS = lPWM;
+                OC2RS = rPWM; 
+                len = sprintf(dataOut, "PWM set: %d %d\r\n", lPWM, rPWM);
+                rxPos = 0;
+                gotRx = 0;
             } else {
                 len = 1;
                 dataOut[0] = 0;
             }
-            
-            
             
             /* if (appData.isReadComplete) {
                 USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
