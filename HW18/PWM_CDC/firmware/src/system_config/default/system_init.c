@@ -159,16 +159,6 @@ const SYS_DEVCON_INIT sysDevconInit =
 };
 
 // </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="SYS_TMR Initialization Data">
-/*** TMR Service Initialization Data ***/
-const SYS_TMR_INIT sysTmrInitData =
-{
-    .moduleInit = {SYS_MODULE_POWER_RUN_FULL},
-    .drvIndex = DRV_TMR_INDEX_0,
-    .tmrFreq = 1000, 
-};
-
-// </editor-fold>
 
 // *****************************************************************************
 // *****************************************************************************
