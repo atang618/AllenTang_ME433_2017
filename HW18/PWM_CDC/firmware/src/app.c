@@ -421,7 +421,7 @@ void APP_Tasks(void) {
                 while (appData.readBuffer[ii] != 0) {
                     // if you got a newline
                     if (appData.readBuffer[ii] == '\n' || appData.readBuffer[ii] == '\r') {
-                        LATAbits.LATA4 = 0; //turn on light
+                        //LATAbits.LATA4 = 0; //turn on light
                         rx[rxPos] = 0; // end the array
                         sscanf(rx, "%d %d", &lPWM, &rPWM); // get the PWM values out of the array
                         gotRx = 1; // set the flag
