@@ -65,9 +65,9 @@ int startTime = 0;
 char rx[64]; // the raw data
 int rxPos = 0; // how much data has been stored
 int gotRx = 0; // the flag
-int rPWM = 2000; // default PWM is 50%
-int lPWM = 2000;
-
+int rPWM = 0; // default PWM is 50%
+int lPWM = 0;
+int blue_flag = 0;
 // *****************************************************************************
 /* Application Data
   Summary:
@@ -336,25 +336,41 @@ void APP_Initialize(void) {
     /* Set up the read buffer */
     appData.readBuffer = &readBuffer[0];
     
-     //Timer Setup
+    //Motor PWM
     T2CONbits.TCKPS 	= 0;			// timer2 pre-scaler N=1 (1:1)
 	PR2 				= 4799;			// period2 = (3999+1) * 1 * 20.8 ns = 0.0001s, 10 kHz
 	TMR2 				= 0;			// set timer to 0;
     T2CONbits.ON		= 1;			// turn on Timer2
     //OC1 Setup
-    RPB15Rbits.RPB15R = 0b0101;         // OC1 = B15
+    RPA0Rbits.RPA0R = 0b0101;           // A0 is OC1        
     OC1CONbits.OCM		= 0x06;         // PWM mode without fault pin; other OC1CON bits are defaults
 	OC1CONbits.OCTSEL	= 0;			// use Timer 2
-	OC1RS				= 2400;         // duty cycle = OC1RS/(PR2+1) = 50%
-	OC1R				= 2400;         // initialize before turning OC1 on
+	OC1RS				= 0;         // duty cycle = OC1RS/(PR2+1) = 0%
+	OC1R				= 0;         // initialize before turning OC1 on
 	OC1CONbits.ON		= 1;			// turn on OC1
+    TRISAbits.TRISA1 = 0;
+    LATAbits.LATA1 = 0;                 // A1 is the direction pin to go along with OC1
     //OC2 Setup
-    RPA1Rbits.RPA1R = 0b0101;           //OC2 = A1
-    OC2CONbits.OCM		= 0x06;         // PWM mode without fault pin; other OC2CON bits are defaults
-	OC2CONbits.OCTSEL	= 0;			// use Timer 2
-	OC2RS				= 2400;         // duty cycle = OC2RS/(PR2+1) = 50%
-	OC2R				= 2400;         // initialize before turning OC2 on
-	OC2CONbits.ON		= 1;			// turn on OC2
+    RPB2Rbits.RPB2R = 0b0101;           // B2 is OC4
+    OC4CONbits.OCM		= 0x06;         // PWM mode without fault pin; other OC2CON bits are defaults
+	OC4CONbits.OCTSEL	= 0;			// use Timer 2
+	OC4RS				= 0;            // duty cycle = OC4RS/(PR2+1) = 0%
+	OC4R				= 0;            // initialize before turning OC4 on
+	OC4CONbits.ON		= 1;			// turn on OC4
+    TRISBbits.TRISB3 = 0;
+    LATBbits.LATB3 = 0;                 // B3 is the direction pin to go along with OC4
+   
+    //Servo PWM
+    T3CONbits.TCKPS = 4; // prescaler N=16
+    PR3 = 60000 - 1; // 50Hz
+    TMR3 = 0;
+    OC3CONbits.OCM = 0b110; // PWM mode without fault pin; other OC1CON bits are defaults
+    OC3CONbits.OCTSEL = 1; // use timer3
+    OC3RS = 4500; // should set the motor to 90 degrees (0.5ms to 2.5ms is 1500 to 7500 for 0 to 180 degrees)
+    OC3R = 4500; // read-only
+    T3CONbits.ON = 1;
+    OC3CONbits.ON = 1;
+    
     
     TRISAbits.TRISA4 = 0;
     LATAbits.LATA4 = 1; //OFF 
@@ -423,7 +439,11 @@ void APP_Tasks(void) {
                     if (appData.readBuffer[ii] == '\n' || appData.readBuffer[ii] == '\r') {
                         //LATAbits.LATA4 = 0; //turn on light
                         rx[rxPos] = 0; // end the array
-                        sscanf(rx, "%d %d", &lPWM, &rPWM); // get the PWM values out of the array
+                        if (rx[rxPos-1] == 'b') {
+                            blue_flag = 1;  // set flag if the Android sees blue
+                        } else {
+                            sscanf(rx, "%d %d", &lPWM, &rPWM); // get the PWM values out of the array
+                        }
                         gotRx = 1; // set the flag
                         break; // get out of the while loop
                     } else if (appData.readBuffer[ii] == 0) {
@@ -473,9 +493,14 @@ void APP_Tasks(void) {
             appData.state = APP_STATE_WAIT_FOR_WRITE_COMPLETE;
             
             if (gotRx) {
-                OC1RS = lPWM;
-                OC2RS = rPWM; 
-                len = sprintf(dataOut, "PWM set: %d %d\r\n", lPWM, rPWM);
+                if (blue_flag) {
+                    OC3RS = 7500; // raise the sails!!
+                    len = sprintf(dataOut, "Raising sails!\r\n");
+                } else {
+                    OC1RS = lPWM;
+                    OC2RS = rPWM; 
+                    len = sprintf(dataOut, "PWM set: %d %d\r\n", lPWM, rPWM);
+                }
                 rxPos = 0;
                 gotRx = 0;
             } else {

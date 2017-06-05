@@ -194,7 +194,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
         // every time there is a new Camera preview frame
         mTextureView.getBitmap(bmp);
-
+        String sendString;
         final Canvas c = mSurfaceHolder.lockCanvas();
         int startY = yStart.getProgress()*5;
         int endY = startY + 10;
@@ -204,6 +204,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
              // which row in the bitmap to analyze to read
             int totalMass = 0;
             int massIndex = 0;
+            boolean blue_flag = false;
             for (int j = startY; j < endY; j += 5) {
                 bmp.getPixels(pixels, 0, bmp.getWidth(), 0, j, bmp.getWidth(), 1);
 
@@ -214,6 +215,9 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
 
                     } else if ((blue(pixels[i]) - red(pixels[i])) > thresh) {
                         pixels[i] = rgb(0, 0, 255);
+                        if (!blue_flag) {
+                            blue_flag = true;
+                        }
                     } else {
                         massIndex += i;
                         totalMass += 1;
@@ -227,12 +231,19 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
             } else {
                 location = massIndex / totalMass;
             }
+            //if there is blue, send to PIC
+            if (blue_flag) {
+                sendString = "b\n";
+                try {
+                    sPort.write(sendString.getBytes(), 10); // 10 is the timeout
+                } catch (IOException e) { }
+            }
         }
 
         // draw a circle at some position
 
         canvas.drawCircle(location, startY, 4, paint1); // x position, y position, diameter, color
-        String sendString;
+
         if (location > 319) {
             direction = 'L';
             lPWM = cPWM-((location - 320)*gain);
