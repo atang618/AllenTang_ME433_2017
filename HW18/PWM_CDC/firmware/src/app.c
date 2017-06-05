@@ -496,6 +496,7 @@ void APP_Tasks(void) {
                 if (blue_flag) {
                     OC3RS = 7500; // raise the sails!!
                     len = sprintf(dataOut, "Raising sails!\r\n");
+                    blue_flag = 0;
                 } else {
                     OC1RS = lPWM;
                     OC2RS = rPWM; 
