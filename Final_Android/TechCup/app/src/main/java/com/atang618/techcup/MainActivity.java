@@ -73,10 +73,10 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
     static char direction = 'C';
     static int location;
     static int threshold = 20;
-    static int rPWM = 4800;
-    static int lPWM = 4800;
-    static int cPWM = 4800; // normal speed 100%
-    static int gain = 10;
+    static int rPWM = 1800;
+    static int lPWM = 1800;
+    static int cPWM = 1800; // normal speed 100%
+    static int gain = 5;
 
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -245,19 +245,19 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         canvas.drawCircle(location, startY, 4, paint1); // x position, y position, diameter, color
 
         if (location > 319) {
-            direction = 'L';
-            lPWM = cPWM-((location - 320)*gain);
-            rPWM = cPWM;
-        } else if (location < 319) {
             direction = 'R';
             lPWM = cPWM;
-            rPWM = cPWM-((320 - location)*gain);
+            rPWM = cPWM-((location - 320)*gain);
+        } else if (location < 319) {
+            direction = 'L';
+            lPWM = cPWM-((320 - location)*gain);
+            rPWM = cPWM;
         } else {
             direction = 'C';
             lPWM = cPWM;
             rPWM = cPWM;
         }
-        sendString = String.valueOf(lPWM) + ' ' + String.valueOf(rPWM) + '\n';
+        sendString = String.valueOf(rPWM) + ' ' + String.valueOf(lPWM) + '\n';
         try {
             sPort.write(sendString.getBytes(), 10); // 10 is the timeout
         } catch (IOException e) { }
