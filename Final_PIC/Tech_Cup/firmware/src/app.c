@@ -500,7 +500,7 @@ void APP_Tasks(void) {
                     i = 0;
                 } else {
                     OC1RS = lPWM;
-                    OC2RS = rPWM; 
+                    OC4RS = rPWM; 
                     len = sprintf(dataOut, "PWM set: %d %d\r\n", lPWM, rPWM);
                 }
                 rxPos = 0;
