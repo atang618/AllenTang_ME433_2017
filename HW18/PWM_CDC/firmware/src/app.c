@@ -444,7 +444,7 @@ void APP_Tasks(void) {
                         }
                         if (strstr(rx,"direction")) {
                             sscanf(rx, "%s %s %s", msg1, msg2, msg3);
-                            if (strstr(msg2,"forward")) {
+                            if (strstr(msg3,"forward")) {
                                 forward = 1;
                             } else if (strstr(msg3, "backward")) {
                                 backward = 1;
@@ -546,7 +546,7 @@ void APP_Tasks(void) {
                         len = sprintf(dataOut, "Right PWM set: %d\r\n",rPWM);
                         right_flag = 0;
                     } else if (left_flag) {
-                        OC2RS = lPWM; 
+                        OC4RS = lPWM; 
                         len = sprintf(dataOut, "Left PWM set: %d\r\n",lPWM);
                         left_flag = 0;
                     }
