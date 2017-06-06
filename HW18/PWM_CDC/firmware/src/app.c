@@ -67,7 +67,13 @@ int rxPos = 0; // how much data has been stored
 int gotRx = 0; // the flag
 int rPWM = 0; // default PWM is 50%
 int lPWM = 0;
-int blue_flag = 0;
+char msg1[30], msg2[30], msg3[30]; // message buffers
+int right_flag = 0;
+int left_flag = 0;
+int forward = 0;
+int backward = 0;
+int direction_flag = 0;
+int velocity_flag = 0;
 // *****************************************************************************
 /* Application Data
   Summary:
@@ -359,19 +365,8 @@ void APP_Initialize(void) {
 	OC4CONbits.ON		= 1;			// turn on OC4
     TRISBbits.TRISB3 = 0;
     LATBbits.LATB3 = 0;                 // B3 is the direction pin to go along with OC4
-   
-    //Servo PWM
-    T3CONbits.TCKPS = 4; // prescaler N=16
-    PR3 = 60000 - 1; // 50Hz
-    TMR3 = 0;
-    OC3CONbits.OCM = 0b110; // PWM mode without fault pin; other OC1CON bits are defaults
-    OC3CONbits.OCTSEL = 1; // use timer3
-    OC3RS = 4500; // should set the motor to 90 degrees (0.5ms to 2.5ms is 1500 to 7500 for 0 to 180 degrees)
-    OC3R = 4500; // read-only
-    T3CONbits.ON = 1;
-    OC3CONbits.ON = 1;
-    
-    
+ 
+     
     TRISAbits.TRISA4 = 0;
     LATAbits.LATA4 = 1; //OFF 
     startTime = _CP0_GET_COUNT();
@@ -437,12 +432,36 @@ void APP_Tasks(void) {
                 while (appData.readBuffer[ii] != 0) {
                     // if you got a newline
                     if (appData.readBuffer[ii] == '\n' || appData.readBuffer[ii] == '\r') {
-                        //LATAbits.LATA4 = 0; //turn on light
+                        len = sprintf(dataOut, "\r\n");
+                        USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
+                        &appData.writeTransferHandle, dataOut, len,
+                        USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
                         rx[rxPos] = 0; // end the array
-                        if (rx[rxPos-1] == 'b') {
-                            blue_flag = 1;  // set flag if the Android sees blue
-                        } else {
-                            sscanf(rx, "%d %d", &lPWM, &rPWM); // get the PWM values out of the array
+                        if (strstr(rx, "right")) {
+                            right_flag = 1;
+                        } else if (strstr(rx, "left")) {
+                            left_flag = 1;
+                        }
+                        if (strstr(rx,"direction")) {
+                            sscanf(rx, "%s %s %s", msg1, msg2, msg3);
+                            if (strstr(msg2,"forward")) {
+                                forward = 1;
+                            } else if (strstr(msg3, "backward")) {
+                                backward = 1;
+                            }
+                            direction_flag = 1;
+                        } else if (strstr(rx,"velocity")) {
+                            int vel;
+                            sscanf(rx, "%s %s %d", msg1, msg2, &vel); // get the velocity out of the array
+                            if (vel > 100) {
+                                vel = 100;
+                            }
+                            if (right_flag) {
+                                rPWM = vel*4800/100;
+                            } else if (left_flag) {
+                                lPWM = vel*4800/100;
+                            }
+                            velocity_flag = 1;
                         }
                         gotRx = 1; // set the flag
                         break; // get out of the while loop
@@ -451,6 +470,10 @@ void APP_Tasks(void) {
                     } else {
                         // save the character into the array
                         rx[rxPos] = appData.readBuffer[ii];
+                        len = sprintf(dataOut, "%c", rx[rxPos]);
+                        USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
+                        &appData.writeTransferHandle, dataOut, len,
+                        USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
                         rxPos++;
                         ii++;
                     }
@@ -493,14 +516,41 @@ void APP_Tasks(void) {
             appData.state = APP_STATE_WAIT_FOR_WRITE_COMPLETE;
             
             if (gotRx) {
-                if (blue_flag) {
-                    OC3RS = 7500; // raise the sails!!
-                    len = sprintf(dataOut, "Raising sails!\r\n");
-                    blue_flag = 0;
-                } else {
-                    OC1RS = lPWM;
-                    OC2RS = rPWM; 
-                    len = sprintf(dataOut, "PWM set: %d %d\r\n", lPWM, rPWM);
+                if (direction_flag) {
+                    if (right_flag & forward) {
+                        LATAbits.LATA1 = 0;
+                        right_flag = 0;
+                        forward = 0;
+                    } else if (right_flag & backward) {
+                        LATAbits.LATA1 = 1;
+                        right_flag = 0;
+                        backward = 0;
+                    } else if (left_flag & forward) {
+                        LATBbits.LATB3 = 0;  
+                        left_flag = 0;
+                        forward = 0;
+                    } else if (left_flag & backward) {
+                        LATBbits.LATB3 = 1;
+                        left_flag = 0;
+                        backward = 0;
+                    }      
+                    if (right_flag) {
+                        len = sprintf(dataOut, "Right direction set %s\r\n",msg3);
+                    } else if (left_flag) {
+                        len = sprintf(dataOut, "Left direction set %s\r\n",msg3);
+                    }
+                    direction_flag = 0;
+                } else if (velocity_flag) {
+                    if (right_flag){
+                        OC1RS = rPWM;
+                        len = sprintf(dataOut, "Right PWM set: %d\r\n",rPWM);
+                        right_flag = 0;
+                    } else if (left_flag) {
+                        OC2RS = lPWM; 
+                        len = sprintf(dataOut, "Left PWM set: %d\r\n",lPWM);
+                        left_flag = 0;
+                    }
+                    velocity_flag = 0;
                 }
                 rxPos = 0;
                 gotRx = 0;

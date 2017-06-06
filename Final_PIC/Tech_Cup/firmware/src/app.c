@@ -497,6 +497,7 @@ void APP_Tasks(void) {
                     OC3RS = 7500; // raise the sails!!
                     len = sprintf(dataOut, "Raising sails!\r\n");
                     blue_flag = 0;
+                    i = 0;
                 } else {
                     OC1RS = lPWM;
                     OC2RS = rPWM; 
@@ -508,18 +509,18 @@ void APP_Tasks(void) {
                 len = 1;
                 dataOut[0] = 0;
             }
-            
-            /* if (appData.isReadComplete) {
-                USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
-                        &appData.writeTransferHandle,
-                        appData.readBuffer, 1,
-                        USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
-            } else { */
-                USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
+            i++;
+            // lower the sails after 2s of no blue 
+            if (i == 201) {
+                i = 0;
+                OC3RS = 4500; // lower the sails 
+            }
+
+            USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
                         &appData.writeTransferHandle, dataOut, len,
                         USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
-                startTime = _CP0_GET_COUNT();
-            //}
+            startTime = _CP0_GET_COUNT();
+            
             break;
 
         case APP_STATE_WAIT_FOR_WRITE_COMPLETE:
