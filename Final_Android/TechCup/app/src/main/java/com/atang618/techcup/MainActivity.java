@@ -76,7 +76,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
     static int rPWM = 4800;
     static int lPWM = 4800;
     static int cPWM = 4800; // normal speed 100%
-    static int gain = 5;
+    static int gain = 10;
 
 
     protected void onCreate(Bundle savedInstanceState) {
