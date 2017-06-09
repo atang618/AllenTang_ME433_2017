@@ -73,9 +73,9 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
     static char direction = 'C';
     static int location;
     static int threshold = 20;
-    static int rPWM = 1800;
-    static int lPWM = 1800;
-    static int cPWM = 1800; // normal speed 100%
+    static int rPWM = 1500;
+    static int lPWM = 1500;
+    static int cPWM = 1500; // normal speed 100%
     static int gain = 5;
 
 
@@ -168,7 +168,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         Camera.Parameters parameters = mCamera.getParameters();
         parameters.setPreviewSize(640, 480);
         parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_INFINITY); // no autofocusing
-        parameters.setAutoExposureLock(true); // keep the white balance constant
+        //parameters.setAutoExposureLock(true); // keep the white balance constant
         mCamera.setParameters(parameters);
         mCamera.setDisplayOrientation(90); // rotate to portrait mode
 
